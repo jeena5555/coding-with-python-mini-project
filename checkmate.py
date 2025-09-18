@@ -1,68 +1,90 @@
-def checkmate(board: str):
-    rows = [r.strip() for r in board.strip().splitlines() if r.strip()]
-    n = len(rows)
-    board = [list(r) for r in rows]
+def checkmate(rawboard):
+    """
+    rawboard รับ stringมา เปลี่ยนเป็น list of string
+    """
 
-    # Find king
-    king_pos = None
-    for i in range(n):
-        for j in range(n):
-            if board[i][j] == 'K':
-                king_pos = (i, j)
-                break
-        if king_pos:
-            break
+    board = rawboard.splitlines()
 
+    king_pos = find_king(board)
     if not king_pos:
-        print("Error: No King found.")
+        print("Error")
         return
 
-    kx, ky = king_pos
+    if (check_straight_lines(board, king_pos) or
+        check_diagonal_lines(board, king_pos) or
+        check_pawns(board, king_pos)):
+        print("Success")
+    elif false:
+        print("Error")
+    else:
+        print("Fail")
 
-    def in_bounds(x, y):
-        return 0 <= x < n and 0 <= y < n
+def find_king(board):
+    board_size = len(board)
+    
+    for x in range(board_size):
+        for y in range(board_size):
+            if board[x][y] == 'K':
+                return (x, y)
+    return None
 
-    rook_dirs = [(1,0), (-1,0), (0,1), (0,-1)]
-    bishop_dirs = [(1,1), (1,-1), (-1,1), (-1,-1)]
-    knight_moves = [(2,1),(2,-1),(-2,1),(-2,-1),(1,2),(1,-2),(-1,2),(-1,-2)]
-    pawn_moves = [(1,-1),(1,1)]  # pawns go downwards
+def check_straight_lines(board, king_pos):
+    """
+    หาแนวตั้งแนวนอน นับจาก king (หา Rook, Queen)
+    """
 
-    # Rook & Queen
-    for dx, dy in rook_dirs:
-        x, y = kx+dx, ky+dy
-        while in_bounds(x,y):
-            if board[x][y] != '.':
-                if board[x][y] in ('R','Q'):
-                    print("Success")
-                    return
+    k_x, k_y = king_pos
+    board_size = len(board)
+    # ขวา, ซ้าย, ล่าง, บน
+    directions = [(0, 1), (0, -1), (1, 0), (-1, 0)] 
+
+    for dx, dy in directions:
+        # ยึดkingเป็นจุดเริ่มต้น
+        x, y = k_x + dx, k_y + dy
+
+        while 0 <= x < board_size and 0 <= y < board_size:
+            piece = board[x][y]
+            if piece in 'RQ':
+                return True
+            if piece != '.':
                 break
-            x += dx
-            y += dy
+            x, y = x + dx, y + dy
 
-    # Bishop & Queen
-    for dx, dy in bishop_dirs:
-        x, y = kx+dx, ky+dy
-        while in_bounds(x,y):
-            if board[x][y] != '.':
-                if board[x][y] in ('B','Q'):
-                    print("Success")
-                    return
+    return False
+
+def check_diagonal_lines(board, king_pos):
+    """
+    หาแนวทแยงมุม นับจาก king (หา Bishop, Queen)
+    """
+    k_x, k_y = king_pos
+    board_size = len(board)
+    # ล่างขวา, ล่างซ้าย, บนขวา, บนซ้าย
+    directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)] 
+
+    for dx, dy in directions:
+        x, y = k_x + dx, k_y + dy
+
+        while 0 <= x < board_size and 0 <= y < board_size:
+            piece = board[x][y]
+            if piece in 'BQ':
+                return True
+            if piece != '.':
                 break
-            x += dx
-            y += dy
+            x, y = x + dx, y + dy
 
-    # Knights
-    for dx, dy in knight_moves:
-        x, y = kx+dx, ky+dy
-        if in_bounds(x,y) and board[x][y] == 'N':
-            print("Success")
-            return
+    return False
 
-    # Pawns
-    for dx, dy in pawn_moves:
-        x, y = kx+dx, ky+dy
-        if in_bounds(x,y) and board[x][y] == 'P':
-            print("Success")
-            return
+def check_pawns(board, king_pos):
+    """
+    หาpawn
+    """
+    board_size = len(board)
+    k_x, k_y = king_pos
+    to_check = [(-1, -1), (-1, 1)]
 
-    print("Fail")
+    for dx, dy in to_check:
+        x, y = x + dx, y + dy
+        if 0 <= x < board_size and 0 <= y < board_size:
+            if board[x][y] == 'P':
+                return True
+    return False
