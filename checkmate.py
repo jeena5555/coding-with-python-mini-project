@@ -25,9 +25,9 @@ def checkmate(rawboard):
 
 def find_king(board):
     board_size = len(board)
-
+    board_size_y = len(board[0])
     for x in range(board_size):
-        for y in range(board_size):
+        for y in range(board_size_y):
             if board[x][y] == 'K':
                 return (x, y)
     return None
@@ -39,6 +39,7 @@ def check_straight_lines(board, king_pos):
 
     k_x, k_y = king_pos
     board_size = len(board)
+    board_size_y = len(board[0])
     # ขวา, ซ้าย, ล่าง, บน
     directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
 
@@ -46,7 +47,7 @@ def check_straight_lines(board, king_pos):
         # ยึดkingเป็นจุดเริ่มต้น
         x, y = k_x + dx, k_y + dy
 
-        while 0 <= x < board_size and 0 <= y < board_size:
+        while 0 <= x < board_size and 0 <= y < board_size_y:
             piece = board[x][y]
             if piece in 'RQ':
                 return True
